@@ -1,0 +1,9 @@
+node_modules/
+.hyperframes/
+hyperframes/.hyperframes/
+remotion/out/
+out/prev/
+out/*.log
+out/run-renders.sh
+out/timing.txt
+*.tsbuildinfo

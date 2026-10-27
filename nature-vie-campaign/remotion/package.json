@@ -1,0 +1,19 @@
+{
+  "name": "nature-vie-remotion",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts NatureVie ../out/nature-vie-remotion.mp4 --codec=h264 --crf=20 --pixel-format=yuv420p --image-format=png --concurrency=1",
+    "still": "remotion still src/index.ts NatureVie"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.539",
+    "@remotion/fonts": "^4.0.539",
+    "@types/react": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.539",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,89 @@
+
+
+      :root {
+        --emerald: #006b4f;
+        --emerald-hi: #1fb98b;
+        --emerald-deep: #00382a;
+        --bordeaux: #801e32;
+        --gold: #d4af37;
+        --gold-hi: #ffe9a0;
+        --white: #ffffff;
+        --black: #0b1110;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin:0; background: var(--black); }
+      .nv-root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--black); font-family: "NV Bebas", sans-serif; color: #fff; }
+      .layer { position: absolute; inset: 0; }
+      .scn { position: absolute; inset: 0; overflow: hidden; }
+      .cam, .sub, .fill { position: absolute; inset: 0; }
+      canvas { position: absolute; inset: 0; width: 1080px; height: 1920px; pointer-events: none; }
+
+      /* ---------- typographie ---------- */
+      .stack { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      .mask { display: block; overflow: hidden; padding: 110px 30px 30px; margin: -110px -30px -30px; text-align: center; white-space: nowrap; }
+      .ch { display: inline-block; }
+      .line { display: block; text-align: center; white-space: nowrap; line-height: 0.86; }
+      .gold-t { background: linear-gradient(100deg, #8f6f12 0%, #d4af37 24%, #fff3bd 48%, #d4af37 64%, #8f6f12 100%); background-size: 260% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+      .gold-t, .shine-t { padding-top: 0.3em; margin-top: -0.3em; }
+      .shine-t { background: linear-gradient(100deg, #ffffff 0%, #ffffff 38%, #ffe9a0 50%, #ffffff 62%, #ffffff 100%); background-size: 320% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+
+      /* ---------- scène 1 ---------- */
+      .s1-base { position: absolute; inset: 0; background: radial-gradient(ellipse 900px 1100px at 50% 55%, #0f2a22 0%, #0b1110 62%, #070c0b 100%); }
+      .beam { position: absolute; top: -200px; width: 260px; height: 2300px; background: linear-gradient(180deg, rgba(31,185,139,0) 0%, rgba(31,185,139,.20) 45%, rgba(212,175,55,.09) 70%, rgba(31,185,139,0) 100%); filter: blur(34px); opacity: 0; }
+      .le { font-size: 128px; letter-spacing: 0.42em; padding-left: 0.42em; color: #d4af37; font-family: "NV Mont", sans-serif; font-weight: 600; font-size: 74px; line-height: 1.2; }
+      .big { font-size: 274px; }
+      .sub-t { font-size: 138px; letter-spacing: 0.14em; padding-left: 0.14em; }
+      .sub-t .ch { color: rgba(212,175,55,.08); -webkit-text-stroke: 3px #d4af37; }
+      .sub-t .fillcopy { position: absolute; inset: 0; }
+      .rule { height: 3px; width: 0; background: linear-gradient(90deg, rgba(212,175,55,0), #d4af37 30%, #fff3bd 50%, #d4af37 70%, rgba(212,175,55,0)); }
+
+      /* ---------- scène 2 ---------- */
+      .s2-base { position: absolute; inset: 0; background: radial-gradient(ellipse 1000px 1200px at 50% 48%, #0a8f6a 0%, #007a5a 30%, #006b4f 52%, #00382a 80%, #021410 100%); }
+      .blob { position: absolute; border-radius: 50%; filter: blur(60px); }
+      .lf { position: absolute; overflow: visible; will-change: transform; }
+      .shaft { position: absolute; top: -400px; width: 360px; height: 2800px; background: linear-gradient(180deg, rgba(255,240,190,0) 0%, rgba(255,240,190,.34) 50%, rgba(255,240,190,0) 100%); mix-blend-mode: screen; filter: blur(26px); }
+      .s2-w { font-size: 300px; }
+      .s2-la { font-size: 168px; }
+      .s2-stack { gap: 6px; }
+      
+      .outline-t .ch { color: rgba(255,255,255,.07); -webkit-text-stroke: 4px #ffffff; position: relative; }
+      .outline-t .ch::after { content: attr(data-c); position: absolute; left: 0; top: 0; color: #fff; -webkit-text-stroke: 0; opacity: var(--f, 0); }
+
+      /* ---------- scène 3 ---------- */
+      .n-base { position: absolute; inset: 0; background: radial-gradient(ellipse 1000px 1250px at 50% 50%, #0aa57b 0%, #006b4f 36%, #00291f 72%, #0b1110 100%); }
+      .e-base { position: absolute; inset: 0; background: radial-gradient(ellipse 1000px 1250px at 50% 50%, #b3314f 0%, #801e32 38%, #3b0b17 74%, #0b1110 100%); }
+      .q-base { position: absolute; inset: 0; background: linear-gradient(112deg, #00503b 0%, #006b4f 36%, #0b1110 50%, #801e32 64%, #5a1424 100%); }
+      .rays { position: absolute; left: -700px; top: -340px; width: 2480px; height: 2480px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.085) 0deg 3.4deg, rgba(255,255,255,0) 3.4deg 11deg); -webkit-mask-image: radial-gradient(circle, #000 12%, transparent 62%); mask-image: radial-gradient(circle, #000 12%, transparent 62%); }
+      .ringx { position: absolute; left: 50%; top: 50%; border-radius: 50%; border: 3px solid rgba(255, 226, 140, .65); margin-left: -300px; margin-top: -300px; width: 600px; height: 600px; }
+      .w3 { white-space: nowrap; line-height: 0.84; text-align: center; }
+      .w3-n { font-size: 358px; }
+      .w3-e { font-size: 330px; }
+      .w3-q { font-size: 270px; }
+      .idx { position: absolute; left: 90px; top: 150px; font-family: "NV Mont", sans-serif; font-weight: 600; font-size: 30px; letter-spacing: .32em; color: #ffe9a0; display: flex; align-items: center; gap: 24px; }
+      .idx i { display: block; width: 0; height: 2px; background: #d4af37; }
+      .slice { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+      .speed { position: absolute; height: 3px; left: 0; background: linear-gradient(90deg, rgba(255,233,160,0), rgba(255,233,160,.9) 60%, #fff); border-radius: 2px; }
+      .bolt { position: absolute; inset: 0; overflow: visible; }
+
+      /* ---------- scène 4 ---------- */
+      .s4-base { position: absolute; inset: 0; background: radial-gradient(ellipse 950px 1250px at 50% 50%, #0b8a69 0%, #006b4f 34%, #003b2d 66%, #04120e 100%); }
+      .s4-shaft { position: absolute; top: -300px; width: 300px; height: 2600px; background: linear-gradient(180deg, rgba(255,226,140,0), rgba(255,226,140,.20) 50%, rgba(255,226,140,0)); filter: blur(30px); mix-blend-mode: screen; }
+      .frame-svg { position: absolute; inset: 0; filter: drop-shadow(0 0 8px rgba(255,214,120,.85)) drop-shadow(0 0 22px rgba(212,175,55,.5)); }
+      .frame-fill { position: absolute; left: 90px; top: 550px; width: 900px; height: 820px; border-radius: 36px; background: radial-gradient(ellipse at 50% 50%, rgba(0,56,42,.75), rgba(4,18,14,.88)); opacity: 0; }
+      .s4-n { font-size: 300px; }
+      .s4-amp { font-family: "NV Serif", serif; font-style: italic; font-weight: 600; color: #f4d77e; font-size: 280px; display: inline-block; margin-right: 18px; line-height: 0.86; }
+      .s4-v { font-size: 300px; }
+      .s4-tick { position: absolute; width: 16px; height: 16px; background: #ffe9a0; transform: rotate(45deg); opacity: 0; box-shadow: 0 0 18px rgba(255,226,140,.9); }
+
+      /* ---------- scène 5 ---------- */
+      .s5-base { position: absolute; inset: 0; background: radial-gradient(ellipse 900px 1100px at 50% 42%, #0a2a21 0%, #0b1110 60%, #060a09 100%); }
+      .s5-rays { position: absolute; left: -500px; top: -100px; width: 2080px; height: 2080px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(212,175,55,.10) 0deg 5deg, rgba(212,175,55,0) 5deg 15deg); -webkit-mask-image: radial-gradient(circle, #000 5%, transparent 55%); mask-image: radial-gradient(circle, #000 5%, transparent 55%); opacity: 0; }
+      .glow5 { position: absolute; left: 190px; top: 450px; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(255,226,140,.75) 0%, rgba(212,175,55,.35) 32%, rgba(212,175,55,0) 68%); opacity: 0; }
+      .logo-wrap { position: absolute; left: 270px; top: 530px; width: 540px; height: 540px; }
+      .logo-wrap img { width: 100%; height: 100%; display: block; border-radius: 50%; box-shadow: 0 30px 90px rgba(0,0,0,.6), 0 0 70px rgba(212,175,55,.35); }
+      .ring5 { position: absolute; left: 210px; top: 470px; width: 660px; height: 660px; filter: drop-shadow(0 0 10px rgba(255,214,120,.8)); }
+      .tag { font-family: "NV Mont", sans-serif; font-weight: 600; font-size: 60px; letter-spacing: .2em; padding-left: .2em; line-height: 1.25; }
+      .tag-wrap { position: absolute; left: 0; right: 0; top: 1190px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+      
+    
