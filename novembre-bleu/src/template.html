@@ -87,9 +87,11 @@ ul.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
           <button class="btn primary" id="bPlay" type="button" aria-pressed="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span>Pause</span></button>
           <button class="btn" id="bRestart" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 3v5h5"/></svg><span>Recommencer</span></button>
           <button class="btn" id="bSound" type="button" aria-pressed="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 10v4h4l5 4V6L7 10z"/><path d="M15 9a4 4 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg><span>Son activé</span></button>
+          <button class="btn" id="bMusic" type="button" aria-pressed="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 17V5l11-2v12"/><circle cx="6.5" cy="17.5" r="3"/><circle cx="17.5" cy="15.5" r="3"/></svg><span>Musique</span></button>
           <span id="time">00.0 / 45 s</span>
         </div>
         <input id="seek" type="range" min="0" max="45" step="0.01" value="0" aria-label="Position dans la vidéo" />
+        <div class="row"><label class="lbl" for="bedVol">Volume du fond musical <input id="bedVol" type="range" min="0" max="1.6" step="0.05" value="1" style="width:130px" /></label></div>
         <div class="row"><label class="lbl" for="quality">Qualité d'affichage
           <select id="quality"><option value="hd">HD 1080 × 1920</option><option value="fluid">Fluide 720 × 1280</option></select></label></div>
       </div>

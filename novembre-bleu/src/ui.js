@@ -4,7 +4,7 @@
 const $ = (s, r = document) => r.querySelector(s);
 const cv = $("#stage"), g2 = cv.getContext("2d");
 const SCENES = ["Accroche", "Surprise", "Vérité", "Danger silencieux", "Signes", "Idées reçues", "Bon réflexe", "Conclusion"];
-const S = { t: 0, playing: false, last: 0, k: 1, recording: false, sfx: true, voiceOn: true, speech: false };
+const S = { t: 0, playing: false, last: 0, k: 1, recording: false, sfx: true, voiceOn: true, speech: false, music: true, bedVol: 1 };
 let quality = "hd";
 
 function setQuality(q) {
@@ -54,6 +54,19 @@ function startVoiceNow(fromT) {
     const s = actx.createBufferSource(); s.buffer = buf; s.connect(master); const off = Math.max(0, fromT - t0), delay = Math.max(0, t0 - fromT); s.start(actx.currentTime + 0.03 + delay, off); voiceSrc.push(s);
   });
 }
+/* ---------- fond musical ---------- */
+let bedBuf = null, bedSrc = null, bedGain = null;
+function stopBed() { try { bedSrc && bedSrc.stop(); } catch (e) {} bedSrc = null; }
+function startBed(fromT) {
+  stopBed(); if (!actx || !S.music || !bedBuf) return;
+  if (actx.state !== "running") { actx.resume().then(() => { if (S.playing) startBedNow(S.t); }).catch(() => {}); return; }
+  startBedNow(fromT);
+}
+function startBedNow(fromT) {
+  stopBed(); if (!actx || !S.music || !bedBuf || actx.state !== "running") return;
+  bedGain = actx.createGain(); bedGain.gain.value = S.bedVol; bedGain.connect(master);
+  bedSrc = actx.createBufferSource(); bedSrc.buffer = bedBuf; bedSrc.connect(bedGain); bedSrc.start(actx.currentTime + 0.03, clamp(fromT, 0, Math.max(0, bedBuf.duration - 0.05)));
+}
 /** voix intégrées (Isac pour l'homme, Roger pour le médecin) */
 async function loadDefaultVoices() {
   if (!ensureAudio()) return;
@@ -61,7 +74,8 @@ async function loadDefaultVoices() {
     const bin = atob(v.wav), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
     try { voiceBuf[id] = await actx.decodeAudioData(u8.buffer); } catch (e) {}
   }
-  if (S.playing) startVoice(S.t);
+  try { const bin = atob(BED), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); bedBuf = await actx.decodeAudioData(u8.buffer); } catch (e) {}
+  if (S.playing) { startVoice(S.t); startBed(S.t); }
 }
 async function loadVoice(id, file) {
   if (!ensureAudio()) return false; const ab = await file.arrayBuffer(), buf = await actx.decodeAudioData(ab);
@@ -73,9 +87,9 @@ async function loadVoice(id, file) {
 const ui = { play: $("#bPlay"), restart: $("#bRestart"), seek: $("#seek"), time: $("#time"), sound: $("#bSound"), qual: $("#quality"), start: $("#startVeil") };
 function setPlaying(p) {
   S.playing = p; ui.play.setAttribute("aria-pressed", String(p)); ui.play.querySelector("span").textContent = p ? "Pause" : (S.t >= DUR - 0.05 ? "Rejouer" : "Lecture");
-  ui.play.dataset.state = p ? "pause" : "play"; if (p) { ensureAudio(); startVoice(S.t); } else stopVoice();
+  ui.play.dataset.state = p ? "pause" : "play"; if (p) { ensureAudio(); startVoice(S.t); startBed(S.t); } else { stopVoice(); stopBed(); }
 }
-function seekTo(t, keep) { S.t = clamp(t, 0, DUR); sfxIdx = 0; if (S.playing) startVoice(S.t); else stopVoice(); draw(); sync(); }
+function seekTo(t, keep) { S.t = clamp(t, 0, DUR); sfxIdx = 0; if (S.playing) { startVoice(S.t); startBed(S.t); } else { stopVoice(); stopBed(); } draw(); sync(); }
 function sync() {
   ui.seek.value = String(S.t); ui.time.textContent = S.t.toFixed(1).padStart(4, "0") + " / 45 s";
   const sc = BOUND.findIndex((b, i) => S.t >= b && S.t < BOUND[i + 1]); document.querySelectorAll(".sc").forEach((el, i) => el.setAttribute("aria-current", String(i === sc)));
@@ -142,8 +156,10 @@ function init() {
   ui.restart.addEventListener("click", () => { seekTo(0); setPlaying(true); ui.start.hidden = true; });
   ui.seek.max = String(DUR); ui.seek.addEventListener("input", () => seekTo(parseFloat(ui.seek.value)));
   ui.sound.addEventListener("click", () => { S.sfx = !S.sfx; S.voiceOn = S.sfx; ui.sound.setAttribute("aria-pressed", String(S.sfx)); ui.sound.querySelector("span").textContent = S.sfx ? "Son activé" : "Son coupé"; if (master) master.gain.value = S.sfx ? 0.9 : 0; if (S.sfx) ensureAudio(); });
+  $("#bMusic").addEventListener("click", () => { S.music = !S.music; $("#bMusic").setAttribute("aria-pressed", String(S.music)); $("#bMusic span").textContent = S.music ? "Musique" : "Sans musique"; if (S.music && S.playing) startBed(S.t); else stopBed(); });
+  $("#bedVol").addEventListener("input", (e) => { S.bedVol = parseFloat(e.target.value); if (bedGain) bedGain.gain.value = S.bedVol; });
   ui.qual.addEventListener("change", () => { setQuality(ui.qual.value); draw(); });
-  ui.start.addEventListener("click", () => { ensureAudio(); ui.start.hidden = true; if (!S.playing) setPlaying(true); else startVoice(S.t); });
+  ui.start.addEventListener("click", () => { ensureAudio(); ui.start.hidden = true; if (!S.playing) setPlaying(true); else { startVoice(S.t); startBed(S.t); } });
   $("#bRec").addEventListener("click", startRecording); $("#bSave").addEventListener("click", saveFile);
   $("#bCopyAll").addEventListener("click", (e) => copyText(VO.map((v) => `[${v.who}] ${v.tag} ${v.text}`).join("\n\n"), e.currentTarget));
   $("#fullVo").addEventListener("change", async (e) => { const f = e.target.files[0]; if (!f) return; const ok = await loadVoice("full", f).catch(() => false); $("#fullOk").hidden = false; $("#fullOk").textContent = ok ? "Piste complète chargée (remplace les voix intégrées)" : "Fichier illisible"; });
