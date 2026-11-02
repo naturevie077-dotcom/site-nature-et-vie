@@ -44,13 +44,29 @@ const voiceBuf = {}; let voiceSrc = [];
 function stopVoice() { voiceSrc.forEach((s) => { try { s.stop(); } catch (e) {} }); voiceSrc = []; }
 function startVoice(fromT) {
   stopVoice(); if (!actx || !S.voiceOn) return;
+  if (actx.state !== "running") { actx.resume().then(() => { if (S.playing) startVoiceNow(S.t); }).catch(() => {}); return; }
+  startVoiceNow(fromT);
+}
+function startVoiceNow(fromT) {
+  stopVoice(); if (!actx || !S.voiceOn || actx.state !== "running") return;
   Object.entries(voiceBuf).forEach(([id, buf]) => {
-    const t0 = id === "full" ? 0 : (VO.find((v) => v.id === id) || {}).t0 ?? 0, end = t0 + buf.duration; if (end <= fromT) return;
+    const m = VOICE[id], t0 = id === "full" ? 0 : m ? m.cue - m.lead : (VO.find((v) => v.id === id) || {}).t0 ?? 0, end = t0 + buf.duration; if (end <= fromT) return;
     const s = actx.createBufferSource(); s.buffer = buf; s.connect(master); const off = Math.max(0, fromT - t0), delay = Math.max(0, t0 - fromT); s.start(actx.currentTime + 0.03 + delay, off); voiceSrc.push(s);
   });
 }
+/** voix intégrées (Isac pour l'homme, Roger pour le médecin) */
+async function loadDefaultVoices() {
+  if (!ensureAudio()) return;
+  for (const [id, v] of Object.entries(VOICE)) {
+    const bin = atob(v.wav), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    try { voiceBuf[id] = await actx.decodeAudioData(u8.buffer); } catch (e) {}
+  }
+  if (S.playing) startVoice(S.t);
+}
 async function loadVoice(id, file) {
-  if (!ensureAudio()) return false; const ab = await file.arrayBuffer(); voiceBuf[id] = await actx.decodeAudioData(ab); if (S.playing) startVoice(S.t); return true;
+  if (!ensureAudio()) return false; const ab = await file.arrayBuffer(), buf = await actx.decodeAudioData(ab);
+  if (id === "full") Object.keys(VOICE).forEach((k) => delete voiceBuf[k]); else { const v = VO.find((x) => x.id === id); if (v && v.clips) v.clips.forEach((c) => delete voiceBuf[c]); }
+  voiceBuf[id] = buf; if (S.playing) startVoice(S.t); return true;
 }
 
 /* ---------- lecture ---------- */
@@ -107,11 +123,11 @@ function buildVO() {
   const host = $("#voList"); host.innerHTML = "";
   VO.forEach((v) => {
     const li = document.createElement("li"); li.className = "vo-item";
-    li.innerHTML = `<div class="vo-head"><span class="vo-sc">S${v.sc}</span><b>${v.who}</b><span class="vo-t">${fmt(v.t0)} → ${fmt(v.t1)}</span></div><p class="vo-tag">${v.tag}</p><p class="vo-text">${v.text}</p><div class="vo-actions"><button type="button" class="btn sm" data-copy="${v.id}">Copier avec balises</button><label class="btn sm file">Ajouter l'audio<input type="file" accept="audio/*" data-vo="${v.id}" /></label><span class="vo-ok" id="ok-${v.id}" hidden>Audio chargé</span></div>`;
+    li.innerHTML = `<div class="vo-head"><span class="vo-sc">S${v.sc}</span><b>${v.who}</b><span class="vo-t">${fmt(v.t0)} → ${fmt(v.t1)}</span></div><p class="vo-tag">${v.tag}</p><p class="vo-text">${v.text}</p><div class="vo-actions"><button type="button" class="btn sm" data-copy="${v.id}">Copier avec balises</button><label class="btn sm file">Remplacer l'audio<input type="file" accept="audio/*" data-vo="${v.id}" /></label><span class="vo-ok" id="ok-${v.id}">Voix intégrée · ${v.who === "Homme" ? "Isac" : v.who === "Les deux" ? "Roger + Isac" : "Roger"}</span></div>`;
     host.appendChild(li);
   });
   host.addEventListener("click", async (e) => { const b = e.target.closest("[data-copy]"); if (!b) return; const v = VO.find((x) => x.id === b.dataset.copy); await copyText(`${v.tag} ${v.text}`, b); });
-  host.addEventListener("change", async (e) => { const inp = e.target.closest("[data-vo]"); if (!inp || !inp.files[0]) return; const ok = await loadVoice(inp.dataset.vo, inp.files[0]).catch(() => false); const m = $("#ok-" + inp.dataset.vo); m.hidden = !ok; m.textContent = ok ? "Audio chargé" : "Fichier illisible"; m.hidden = false; });
+  host.addEventListener("change", async (e) => { const inp = e.target.closest("[data-vo]"); if (!inp || !inp.files[0]) return; const ok = await loadVoice(inp.dataset.vo, inp.files[0]).catch(() => false); const m = $("#ok-" + inp.dataset.vo); m.textContent = ok ? "Ton audio remplace la voix intégrée" : "Fichier illisible"; m.hidden = false; });
 }
 async function copyText(txt, btn) {
   const old = btn.textContent; try { await navigator.clipboard.writeText(txt); btn.textContent = "Copié"; } catch (e) { const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); btn.textContent = "Copié"; } catch (_) { btn.textContent = "Sélectionne et copie"; } ta.remove(); }
@@ -127,16 +143,16 @@ function init() {
   ui.seek.max = String(DUR); ui.seek.addEventListener("input", () => seekTo(parseFloat(ui.seek.value)));
   ui.sound.addEventListener("click", () => { S.sfx = !S.sfx; S.voiceOn = S.sfx; ui.sound.setAttribute("aria-pressed", String(S.sfx)); ui.sound.querySelector("span").textContent = S.sfx ? "Son activé" : "Son coupé"; if (master) master.gain.value = S.sfx ? 0.9 : 0; if (S.sfx) ensureAudio(); });
   ui.qual.addEventListener("change", () => { setQuality(ui.qual.value); draw(); });
-  ui.start.addEventListener("click", () => { ensureAudio(); ui.start.hidden = true; if (!S.playing) setPlaying(true); });
+  ui.start.addEventListener("click", () => { ensureAudio(); ui.start.hidden = true; if (!S.playing) setPlaying(true); else startVoice(S.t); });
   $("#bRec").addEventListener("click", startRecording); $("#bSave").addEventListener("click", saveFile);
   $("#bCopyAll").addEventListener("click", (e) => copyText(VO.map((v) => `[${v.who}] ${v.tag} ${v.text}`).join("\n\n"), e.currentTarget));
-  $("#fullVo").addEventListener("change", async (e) => { const f = e.target.files[0]; if (!f) return; const ok = await loadVoice("full", f).catch(() => false); $("#fullOk").hidden = false; $("#fullOk").textContent = ok ? "Piste complète chargée" : "Fichier illisible"; });
+  $("#fullVo").addEventListener("change", async (e) => { const f = e.target.files[0]; if (!f) return; const ok = await loadVoice("full", f).catch(() => false); $("#fullOk").hidden = false; $("#fullOk").textContent = ok ? "Piste complète chargée (remplace les voix intégrées)" : "Fichier illisible"; });
   $("#speechToggle").addEventListener("change", (e) => { S.speech = e.target.checked; });
   $("#logoFile").addEventListener("change", (e) => { const f = e.target.files[0]; if (!f) return; const im = new Image(); im.onload = () => { LOGO_IMG = im; $("#logoState").textContent = "Logo remplacé par ton fichier."; }; im.src = URL.createObjectURL(f); });
   const logo = new Image(); logo.onload = () => { LOGO_IMG = logo; }; logo.src = document.getElementById("logoData").getAttribute("data-src");
   window.addEventListener("keydown", (e) => { if (e.code === "Space" && !/INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName)) { e.preventDefault(); ui.play.click(); } });
   document.addEventListener("visibilitychange", () => { if (document.hidden && S.playing && !S.recording) setPlaying(false); });
-  setQuality("hd"); draw(); sync(); S.last = performance.now(); requestAnimationFrame(loop); setPlaying(true); // lecture automatique (images ; le son démarre au premier appui)
+  setQuality("hd"); draw(); sync(); S.last = performance.now(); requestAnimationFrame(loop); setPlaying(true); loadDefaultVoices(); // lecture automatique (images ; le son démarre au premier appui)
 }
 window.__nb = { render: (t) => { S.playing = false; S.t = t; draw(); }, SFX, synth, DUR, BOUND, renderTo: (c, t) => renderFrame(c, t), setQuality };
 document.fonts.load('48px "NB Lilita"').then(() => document.fonts.load('900 40px "NB Nunito"')).catch(() => {}).then(init);

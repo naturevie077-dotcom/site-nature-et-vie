@@ -100,9 +100,9 @@ ul.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
       <details open>
         <summary>Voix off ElevenLabs</summary>
         <div class="pbody">
-          <p>Chaque réplique a son minutage exact. Génère l'audio dans ElevenLabs avec le texte balisé, puis ajoute le fichier ici : il se cale tout seul sur la timeline et il est inclus dans l'enregistrement.</p>
+          <p>Les voix ElevenLabs sont déjà intégrées et calées sur la vidéo : Isac pour l'homme, Roger pour le médecin. La bouche des personnages suit le volume réel de chaque réplique. Tu peux remplacer une réplique par un autre fichier audio : il se cale sur son minutage et il est inclus dans l'enregistrement.</p>
           <div class="row"><button class="btn gold sm" id="bCopyAll" type="button">Copier tout le script balisé</button>
-            <label class="btn sm file">Piste voix complète (45 s)<input type="file" id="fullVo" accept="audio/*" /></label><span class="vo-ok" id="fullOk" hidden></span></div>
+            <label class="btn sm file">Piste voix complète (remplace tout)<input type="file" id="fullVo" accept="audio/*" /></label><span class="vo-ok" id="fullOk" hidden></span></div>
           <details class="inner" id="voDetails"><summary>Les 9 répliques minutées</summary><ol class="vo-list" id="voList"></ol></details>
           <label class="lbl"><input type="checkbox" id="speechToggle" /> Aperçu avec la voix du navigateur (repérage du rythme, non enregistré)</label>
           <p class="note">Les répliques des scènes 1 et 3 sont denses (environ 4 mots par seconde). Si la voix déborde, accélère légèrement le débit dans ElevenLabs ou raccourcis le texte.</p>

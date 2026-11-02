@@ -6,35 +6,39 @@ const LAY = { manX: 270, docX: 810, y: 1500, s: 0.9, bubY: 1130, headY: 1196 };
 
 /* ---------- données voix off / bulles (UI + rendu partagent la même source) ---------- */
 const VO = [
-  { id: "s1", sc: 1, t0: 0.25, t1: 4.6, who: "Homme", tag: "[confident][proud][playful]", text: "MOI, JE FAIS SOUVENT L'AMOUR ! DONC LE CANCER DE LA PROSTATE NE PEUT PAS M'ATTRAPER, NON ?" },
-  { id: "s2", sc: 2, t0: 5.3, t1: 7.6, who: "Médecin", tag: "[surprised][loud][teasing]", text: "HÉ, MON FRÈRE ! QUI T'A DIT ÇA ?!" },
-  { id: "s3a", sc: 3, t0: 10.2, t1: 14.4, who: "Médecin", tag: "[calm][thoughtful]", text: "Certaines études trouvent un lien entre éjaculations fréquentes et risque plus faible." },
-  { id: "s3b", sc: 3, t0: 14.5, t1: 18.8, who: "Médecin", tag: "[firm][kind]", text: "Mais cela ne prouve pas que faire l'amour empêche le cancer !" },
-  { id: "s4", sc: 4, t0: 19.3, t1: 23.8, who: "Médecin", tag: "[serious][low voice]", text: "Et attention ! Le cancer de la prostate peut évoluer sans symptôme au début." },
-  { id: "s5", sc: 5, t0: 24.3, t1: 30.9, who: "Médecin", tag: "[urgent][rhythmic]", text: "Tu urines souvent la nuit ? Ton jet est faible ? Tu vois du sang dans tes urines ? Consulte !" },
-  { id: "s6", sc: 6, t0: 31.3, t1: 35.7, who: "Médecin", tag: "[reassuring][then firm]", text: "Ces signes ne veulent pas forcément dire cancer, mais il ne faut pas les ignorer !" },
-  { id: "s7", sc: 7, t0: 36.3, t1: 40.7, who: "Médecin", tag: "[warm][encouraging]", text: "Même sans symptôme, parle de tes risques et du dépistage avec ton médecin." },
-  { id: "s8", sc: 8, t0: 41.3, t1: 44.4, who: "Les deux", tag: "[excited][cheerful]", text: "NOVEMBRE BLEU ! PRENDS TA SANTÉ EN MAIN !" },
+  { id: "s1", sc: 1, t0: 0.22, t1: 4.65, clips: ["s1"], who: "Homme", tag: "[confident][proud][playful]", text: "MOI, JE FAIS SOUVENT L'AMOUR ! DONC LE CANCER DE LA PROSTATE NE PEUT PAS M'ATTRAPER, NON ?" },
+  { id: "s2", sc: 2, t0: 5.3, t1: 7.44, clips: ["s2"], who: "Médecin", tag: "[surprised][loud][teasing]", text: "HÉ, MON FRÈRE ! QUI T'A DIT ÇA ?!" },
+  { id: "s3a", sc: 3, t0: 10.2, t1: 14.41, clips: ["s3a"], who: "Médecin", tag: "[calm][thoughtful]", text: "Certaines études trouvent un lien entre éjaculations fréquentes et risque plus faible." },
+  { id: "s3b", sc: 3, t0: 14.5, t1: 17.11, clips: ["s3b"], who: "Médecin", tag: "[firm][kind]", text: "Mais cela ne prouve pas que faire l'amour empêche le cancer !" },
+  { id: "s4", sc: 4, t0: 19.3, t1: 23.68, clips: ["s4"], who: "Médecin", tag: "[serious][low voice]", text: "Et attention ! Le cancer de la prostate peut évoluer sans symptôme au début." },
+  { id: "s5", sc: 5, t0: 24.45, t1: 31.02, clips: ["s5a", "s5b", "s5c", "s5d"], who: "Médecin", tag: "[urgent][rhythmic]", text: "Tu urines souvent la nuit ? Ton jet est faible ? Tu vois du sang dans tes urines ? Consulte !" },
+  { id: "s6", sc: 6, t0: 31.3, t1: 35.29, clips: ["s6"], who: "Médecin", tag: "[reassuring][then firm]", text: "Ces signes ne veulent pas forcément dire cancer, mais il ne faut pas les ignorer !" },
+  { id: "s7", sc: 7, t0: 36.3, t1: 40.07, clips: ["s7"], who: "Médecin", tag: "[warm][encouraging]", text: "Même sans symptôme, parle de tes risques et du dépistage avec ton médecin." },
+  { id: "s8", sc: 8, t0: 41.3, t1: 43.7, clips: ["s8d", "s8m"], who: "Les deux", tag: "[excited][cheerful]", text: "NOVEMBRE BLEU ! PRENDS TA SANTÉ EN MAIN !" },
 ];
 const BUBBLES = [
-  { t0: 0.35, t1: 4.55, who: "man", text: VO[0].text, w: 920, y: 940, tx: 540, ty: 1000, size: 48 },
-  { t0: 5.3, t1: 7.7, who: "doc", text: VO[1].text, w: 860, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 54 },
-  { t0: 10.2, t1: 14.4, who: "doc", text: VO[2].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 46 },
-  { t0: 14.5, t1: 18.9, who: "doc", text: VO[3].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 48 },
-  { t0: 19.3, t1: 23.9, who: "doc", text: VO[4].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 46 },
-  { t0: 24.3, t1: 26.5, who: "doc", text: "Tu urines souvent la nuit ?", w: 820, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 50 },
-  { t0: 26.6, t1: 28.5, who: "doc", text: "Ton jet est faible ?", w: 760, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 50 },
-  { t0: 28.6, t1: 30.4, who: "doc", text: "Tu vois du sang dans tes urines ?", w: 860, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 50 },
-  { t0: 30.45, t1: 31.0, who: "doc", text: "Consulte !", w: 560, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 60 },
-  { t0: 31.3, t1: 35.8, who: "doc", text: VO[6].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 46 },
-  { t0: 36.3, t1: 40.8, who: "doc", text: VO[7].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 46 },
+  { t0: 0.3, t1: 4.7, who: "man", text: VO[0].text, w: 920, y: 940, tx: 540, ty: 1000, size: 48 },
+  { t0: 5.3, t1: 7.5, who: "doc", text: VO[1].text, w: 860, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 54 },
+  { t0: 10.2, t1: 14.45, who: "doc", text: VO[2].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 46 },
+  { t0: 14.5, t1: 17.15, who: "doc", text: VO[3].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 48 },
+  { t0: 19.3, t1: 23.75, who: "doc", text: VO[4].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 46 },
+  { t0: 24.4, t1: 25.6, who: "doc", text: "Tu urines souvent la nuit ?", w: 820, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 50 },
+  { t0: 26.65, t1: 27.62, who: "doc", text: "Ton jet est faible ?", w: 760, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 50 },
+  { t0: 28.7, t1: 30.2, who: "doc", text: "Tu vois du sang dans tes urines ?", w: 860, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 50 },
+  { t0: 30.4, t1: 31.08, who: "doc", text: "Consulte !", w: 560, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 60 },
+  { t0: 31.3, t1: 35.35, who: "doc", text: VO[6].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 46 },
+  { t0: 36.3, t1: 40.12, who: "doc", text: VO[7].text, w: 900, y: LAY.bubY, tx: LAY.docX, ty: LAY.headY, size: 46 },
 ];
 const SFX = [
   [0.22, "pop"], [2.3, "pop"], [4.9, "whoosh"], [5.05, "whoosh"], [7.2, "thud"], [9.5, "whoosh"], [14.5, "blip"], [18.8, "whoosh"], [20.4, "flip"], [23.6, "whoosh"],
   [24.6, "tick"], [24.95, "tick"], [25.3, "tick"], [25.65, "tick"], [26.95, "drip"], [27.5, "drip"], [28.1, "drip"], [29.0, "drip"], [30.2, "ding"], [30.8, "whoosh"], [35.45, "whoosh"],
   [37.3, "pen"], [38.0, "pen"], [38.7, "pen"], [39.4, "pen"], [40.85, "whoosh"], [41.2, "ding"], [43.1, "ding"],
 ];
-const speak = (t, ids) => { let m = 0; ids.forEach((id) => { const v = VO.find((x) => x.id === id); m = Math.max(m, talkAmt(t, v.t0, v.t1)); }); return m; };
+const speak = (t, ids) => {
+  let m = 0;
+  for (const id of ids) { const v = VOICE[id]; if (!v) continue; const u = (t - (v.cue - v.lead)) * 50; if (u < 0 || u >= v.env.length - 1) continue; const i = Math.floor(u), a = +v.env[i], b = +v.env[i + 1]; m = Math.max(m, (a + (b - a) * (u - i)) / 9); }
+  return clamp(Math.pow(m, 0.8) * 1.15);
+};
 const fitSize = (txt, maxW, fam, maxS) => { ctx.save(); ctx.font = fontCss(100, fam); const w = ctx.measureText(txt).width; ctx.restore(); return Math.min(maxS, (maxW / w) * 100); };
 
 /* ---------- petites illustrations ---------- */
@@ -264,7 +268,7 @@ function symptomPill(t, t0, idx, txt, kind) {
 }
 function scene5(t) {
   const night = lerp(0.8, 0.1, pr(t, 26.4, 1.0, E.io2)); sky(t, night); rays(t, 540, 700, 18, C.royal2, 0.06, 0.05);
-  const tD = speak(t, ["s5"]), w3 = pr(t, 28.8, 0.6, E.o2);
+  const tD = speak(t, ["s5a", "s5b", "s5c", "s5d"]), w3 = pr(t, 28.8, 0.6, E.o2);
   const D = { kind: "doc", x: LAY.docX, y: LAY.y, s: LAY.s, t, talk: tD, smile: 0, gaze: [-0.7, 0], headRot: -0.05, hdy: tD > 0.1 ? -4 * Math.abs(Math.sin(t * 6.5)) : 0, browL: 0.35, tilt: 0.45 };
   const em = 0.5 + 0.5 * Math.sin(t * 5);
   D.aL = { T: [-310, 150 - 20 * em], hand: "open", elbow: "down" }; D.aR = { T: [310, 150 + 20 * (1 - em)], hand: "open", elbow: "down" };
@@ -396,13 +400,13 @@ function ribbon(cx, cy, s, t, a = 1) {
 function scene8(t) {
   const g = ctx.createRadialGradient(540, 700, 80, 540, 900, 1500); g.addColorStop(0, "#4f86ff"); g.addColorStop(0.5, C.royal); g.addColorStop(1, C.navy); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   rays(t, 540, 700, 20, "#fff", 0.09, 0.12); floaters(t, 41.2, 45, 540, 1100, "star", 22, 21);
-  const tt = speak(t, ["s8"]);
+  const tt = speak(t, ["s8m"]), td = speak(t, ["s8d"]);
   const rs = spr(t, 41.1, 11, 0.45), up = pr(t, 43.0, 0.7, E.io3), wig = Math.sin(t * 3.2) * 0.04;
   const cy = lerp(620, 300, up), sc = lerp(1.85, 0.9, up);
   ribbon(540, cy, rs * sc, t); sparkle(380, cy - 180, 40 * rs, C.gold2, t, 1); sparkle(720, cy + 60, 30 * rs, "#fff", -t, 1);
   const M = { kind: "man", x: LAY.manX, y: LAY.y + 20, s: LAY.s, t, talk: tt, smile: 1, gaze: [0.5, 0], browL: 0.5, headRot: 0.05 + 0.03 * Math.sin(t * 4), hdy: -6 * Math.abs(Math.sin(t * 5)) };
   M.aL = { T: [-230, 330] }; M.aR = { T: [330, -170 + 20 * Math.sin(t * 8)], hand: "open", elbow: "out" };
-  const D = { kind: "doc", x: LAY.docX, y: LAY.y + 20, s: LAY.s, t, talk: tt, smile: 1, gaze: [-0.5, 0], browL: 0.5, headRot: -0.05 - 0.03 * Math.sin(t * 4.3), hdy: -6 * Math.abs(Math.sin(t * 5.2)) };
+  const D = { kind: "doc", x: LAY.docX, y: LAY.y + 20, s: LAY.s, t, talk: td, smile: 1, gaze: [-0.5, 0], browL: 0.5, headRot: -0.05 - 0.03 * Math.sin(t * 4.3), hdy: -6 * Math.abs(Math.sin(t * 5.2)) };
   D.aL = { T: [-300, -20 + 10 * Math.sin(t * 6)], hand: "thumb", elbow: "out" }; D.aR = { T: [230, 330] };
   drawChar(M); drawChar(D);
   // titre

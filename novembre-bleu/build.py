@@ -13,7 +13,7 @@ fonts = "\n".join([
     face("NB Nunito", 900, fonts_dir / "nunito-latin-900-normal.woff2"),
 ])
 logo = "data:image/jpeg;base64," + b64(R / "src" / "logo-nature-et-vie.jpg")
-js = "\n".join((R / "src" / f).read_text() for f in ["engine.js", "chars.js", "scenes.js", "ui.js"])
+js = "\n".join((R / "src" / f).read_text() for f in ["engine.js", "chars.js", "voice.js", "scenes.js", "ui.js"])
 tpl = (R / "src" / "template.html").read_text()
 out = tpl.replace("{{FONTS}}", fonts).replace("{{LOGO}}", logo).replace("{{JS}}", js)
 (R / "dist").mkdir(exist_ok=True)
