@@ -125,21 +125,21 @@ function synth(c, out, kind, w, vol = 1) {
  * pour recaler sur la voix off, il suffit de modifier ces valeurs.
  * ========================================================================== */
 const CFG = {
-  dur: 52,
-  s2: 5.0, s3: 8.0, s4: 22.0, s5: 38.0, s6: 44.0,
-  logo: 6.15,
-  head: 8.5, rowsL: [9.8, 14.2, 18.4],        // scène 3 : colonne gauche
-  tableUp: 22.0,                               // le tableau monte, la colonne droite se remplit
-  headR: 22.4, rowsR: [23.6, 26.8, 30.4],      // scène 4 : colonne droite (coches)
-  photo: 30.6, bonus: 32.8, example: 34.4,
-  s5words: 38.5, point: 41.7,
-  s6title: 44.3, label: 45.4, number: 45.9, underline: 47.5, group: 48.6,
+  dur: 46.6, hit: 4.3,
+  s2: 4.9, s3: 8.2, s4: 18.8, s5: 33.2, s6: 36.9,
+  logo: 5.6,
+  head: 8.3, rowsL: [10.3, 13.3, 15.7],        // scène 3 : colonne gauche (calée sur la voix)
+  tableUp: 18.8,                               // le tableau monte, la colonne droite se remplit
+  headR: 19.3, rowsR: [21.2, 23.2, 25.6],      // scène 4 : colonne droite (coches)
+  photo: 27.1, bonus: 28.5, example: 29.6,
+  s5words: 33.6, point: 35.6,
+  s6title: 37.4, label: 38.7, digits: [40.3, 40.85, 41.55, 42.2, 42.75], underline: 43.0, group: 44.0,
 };
 const SFX = (() => {
   const a = []; for (let k = 1; k <= 20; k++) a.push([0.25 + 3.3 * (1 - Math.pow(1 - k / 20, 1.7)), "tick"]);
-  return a.concat([[4.02, "thud"], [4.95, "whoosh"], [5.05, "fall"], [CFG.logo, "pop"], [CFG.logo + 0.2, "ding"], [7.65, "whoosh"], [CFG.head, "pop"], [CFG.rowsL[0], "pop"], [CFG.rowsL[1], "pop"], [CFG.rowsL[2], "pop"],
+  return a.concat([[CFG.hit, "thud"], [CFG.s2 - 0.05, "whoosh"], [CFG.s2 + 0.05, "fall"], [CFG.logo, "pop"], [CFG.logo + 0.2, "ding"], [CFG.s3 - 0.55, "whoosh"], [CFG.head, "pop"], [CFG.rowsL[0], "pop"], [CFG.rowsL[1], "pop"], [CFG.rowsL[2], "pop"],
     [CFG.tableUp - 0.1, "whoosh"], [CFG.headR, "pop"], [CFG.rowsR[0] + 0.3, "check"], [CFG.rowsR[1] + 0.3, "check"], [CFG.rowsR[2] + 0.3, "check"], [CFG.photo, "whoosh"], [CFG.bonus, "coin"],
-    [CFG.s5 - 0.25, "whoosh"], [CFG.point, "thud"], [CFG.point + 0.05, "ding"], [CFG.s6 - 0.1, "whoosh"], [CFG.number, "tick"], [CFG.number + 0.18, "tick"], [CFG.number + 0.36, "tick"], [CFG.number + 0.54, "tick"], [CFG.number + 0.72, "tick"], [CFG.group + 0.1, "ding"]]);
+    [CFG.s5 - 0.25, "whoosh"], [CFG.point, "thud"], [CFG.point + 0.05, "ding"], [CFG.s6 - 0.1, "whoosh"], ...CFG.digits.map((d) => [d, "tick"]), [CFG.group + 0.1, "ding"]]);
 })();
 let IMG = { logo: null, photo: null };
 
@@ -168,7 +168,7 @@ const PYR = (() => {
   return a;
 })();
 function pyramid(t, fall = 0) {
-  const tf = Math.min(t, 4.0), hit = t > 4.0 ? Math.exp(-(t - 4.0) * 7) * Math.sin((t - 4.0) * 40) * 0.05 : 0, cold = pr(t, 4.0, 0.5, E.o2);
+  const tf = Math.min(t, CFG.hit), hit = t > CFG.hit ? Math.exp(-(t - CFG.hit) * 7) * Math.sin((t - CFG.hit) * 40) * 0.05 : 0, cold = pr(t, CFG.hit, 0.5, E.o2);
   PYR.forEach((p) => {
     const sp = spr(tf, p.ta, 16, 0.55); if (sp <= 0.001) return; const par = p.par || p;
     let x = lerp(par.x, p.x, clamp(sp, 0, 1.15)), y = lerp(par.y, p.y, clamp(sp, 0, 1.15)), a = clamp((tf - p.ta) / 0.12), sc = 0.35 + 0.65 * sp, rot = 0, lineA = 1;
@@ -233,19 +233,19 @@ function drawTable(t) {
 function scene1(t) {
   bgGray(t); pyramid(t);
   // texte clé : peu à la fois
-  const A = pr(t, 0.3, 0.4, E.back) * (1 - pr(t, 1.35, 0.3, E.i2)); if (A > 0.01) txt("Recruter,", 540, 300, 128, 800, C.ink, { sc: A, alpha: clamp(A * 2) });
-  const B = spr(t, 1.4, 14, 0.5) * (1 - pr(t, 3.3, 0.3, E.i2)); if (B > 0.01) { txt("encore", 540, 250, 92, 600, "#7d8784", { sc: B, alpha: clamp(B) }); txt("recruter…", 540, 360, 128, 800, C.ink, { sc: B, alpha: clamp(B) }); }
-  if (t > 3.4) { const k = spr(t, 3.4, 14, 0.5); wordsIn(t, "pour espérer gagner", 540, 250, 66, 600, "#4a5350", 3.4, 0.2, 940); txt("un jour ?", 540, 380, 118, 800, C.ink, { sc: k, alpha: clamp(k) }); }
+  const A = pr(t, 0.35, 0.4, E.back) * (1 - pr(t, 1.2, 0.3, E.i2)); if (A > 0.01) txt("Recruter,", 540, 300, 128, 800, C.ink, { sc: A, alpha: clamp(A * 2) });
+  const B = spr(t, 1.3, 14, 0.5) * (1 - pr(t, 3.05, 0.3, E.i2)); if (B > 0.01) { txt("encore", 540, 250, 92, 600, "#7d8784", { sc: B, alpha: clamp(B) }); txt("recruter…", 540, 360, 128, 800, C.ink, { sc: B, alpha: clamp(B) }); }
+  if (t > 3.2) { const k = spr(t, 3.75, 14, 0.5); wordsIn(t, "pour espérer gagner", 540, 250, 66, 600, "#4a5350", 3.2, 0.2, 940); txt("un jour ?", 540, 380, 118, 800, C.ink, { sc: k, alpha: clamp(k) }); }
 }
 function scene2(t) {
-  const wr = pr(t, 5.3, 0.9, E.io2) * 1700;
+  const wr = pr(t, CFG.s2 + 0.3, 0.9, E.io2) * 1700;
   // dessous : pyramide qui s'effondre sur fond gris
   bgGray(t); pyramid(t, 1);
   if (wr > 1) { ctx.save(); circ(540, 960, wr); ctx.clip(); bgEmerald(t); ctx.restore(); }
   // logo + phrase
   const lp = spr(t, CFG.logo, 13, 0.5);
   if (lp > 0.01) { logoPlate(540, 900, 700, clamp(lp * 1.4), lerp(0.55, 1, Math.min(lp, 1.08))); for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU + 0.4, rr0 = 470 + 30 * Math.sin(t * 3 + i); sparkle(540 + Math.cos(a) * rr0, 900 + Math.sin(a) * rr0 * 0.86, 20 + 8 * Math.sin(t * 5 + i), i % 2 ? C.gold2 : "#fff", t * 1.5, clamp(lp) * (0.5 + 0.5 * Math.sin(t * 4 + i * 2))); } }
-  if (t > 6.4) { wordsIn(t, "Chez Nature & Vie,", 540, 1330, 68, 700, "#fff", 6.5, 0.2, 960, { shadow: "rgba(0,0,0,.35)" }); wordsIn(t, "on fait autrement.", 540, 1425, 76, 800, C.gold2, 7.0, 0.22, 960, { shadow: "rgba(0,0,0,.35)" }); }
+  if (t > CFG.logo + 0.1) { wordsIn(t, "Chez Nature & Vie,", 540, 1330, 68, 700, "#fff", 5.8, 0.2, 960, { shadow: "rgba(0,0,0,.35)" }); wordsIn(t, "on fait autrement.", 540, 1425, 76, 800, C.gold2, 6.55, 0.22, 960, { shadow: "rgba(0,0,0,.35)" }); }
 }
 function scene3(t) {
   bgLight(t, pr(t, CFG.tableUp, 0.9, E.o2));
@@ -297,7 +297,7 @@ function scene6(t) {
   const ip = spr(t, CFG.label + 0.2, 13, 0.5), ring = ((t - CFG.label) * 0.8) % 1;
   if (ip > 0.01) { ctx.save(); ctx.globalAlpha = clamp(ip); phoneIcon(440, 780, 88 * Math.min(ip, 1.1), C.gold2, t > CFG.label ? ring : 0); msgIcon(640, 780, 88 * Math.min(ip, 1.1), C.gold2, t > CFG.label ? (ring + 0.5) % 1 : 0); ctx.restore(); }
   const pairs = ["07", "87", "59", "24", "74"], size = fitSize("07 87 59 24 74", 940, 800, 124); ctx.save(); ctx.font = font(size, 800); const sp = ctx.measureText(" ").width, wd = pairs.map((p) => ctx.measureText(p).width), total = wd.reduce((a, b) => a + b, 0) + sp * 4; ctx.restore();
-  let x = 540 - total / 2; pairs.forEach((p, i) => { const t0 = CFG.number + i * 0.18, k = spr(t, t0, 14, 0.5); if (k > 0.01) txt(p, x + wd[i] / 2, 940 + (1 - k) * 40, size, 800, "#fff", { sc: 0.7 + 0.3 * k, alpha: clamp(k * 2), shadow: "rgba(0,0,0,.35)", blur: 18, oy: 8 }); x += wd[i] + sp; });
+  let x = 540 - total / 2; pairs.forEach((p, i) => { const t0 = CFG.digits[i], k = spr(t, t0, 14, 0.5); if (k > 0.01) txt(p, x + wd[i] / 2, 940 + (1 - k) * 40, size, 800, "#fff", { sc: 0.7 + 0.3 * k, alpha: clamp(k * 2), shadow: "rgba(0,0,0,.35)", blur: 18, oy: 8 }); x += wd[i] + sp; });
   const uw = total * pr(t, CFG.underline, 0.6, E.o3); ctx.fillStyle = C.gold; rr(540 - total / 2, 1040, uw, 12, 6); ctx.fill(); ctx.restore();
   // logo + signature
   const lp = spr(t, CFG.group + 0.3, 12, 0.5); if (lp > 0.01) { logoPlate(540, 1300, 460, clamp(lp * 1.4), lerp(0.6, 1, Math.min(lp, 1.06))); txt("Vivre mieux, Naturellement.", 540, 1620, fitSize("Vivre mieux, Naturellement.", 940, 700, 54), 700, C.gold2, { alpha: pr(t, CFG.group + 0.9, 0.5, E.o2), shadow: "rgba(0,0,0,.35)", blur: 14, oy: 6 }); }
@@ -311,8 +311,8 @@ function wipeUp(t, t0, d, drawOld, drawNew) {
 }
 function renderFrame(c, t) {
   useCtx(c); t = clamp(t, 0, CFG.dur - 0.0001); c.save(); c.clearRect(0, 0, W, H);
-  if (t < CFG.s3 - 0.4) (t < CFG.s2 ? scene1 : scene2)(t);
-  else if (t < CFG.s3) { scene3(t); const p = pr(t, 7.6, 0.4, E.io2); c.save(); c.beginPath(); c.rect(0, 0, W, H * (1 - p)); c.clip(); scene2(7.6); c.restore(); }
+  if (t < CFG.s3 - 0.5) (t < CFG.s2 ? scene1 : scene2)(t);
+  else if (t < CFG.s3) { scene3(t); const p = pr(t, CFG.s3 - 0.5, 0.5, E.io2); c.save(); c.beginPath(); c.rect(0, 0, W, H * (1 - p)); c.clip(); scene2(CFG.s3 - 0.5); c.restore(); }
   else if (t < CFG.s5 - 0.45) scene4(t);
   else if (t < CFG.s6 - 0.45) wipeUp(t, CFG.s5 - 0.45, 0.45, () => scene4(t), () => scene5(t));
   else if (t < CFG.s6) { scene5(t); const p = pr(t, CFG.s6 - 0.45, 0.45, E.o2); c.save(); c.globalAlpha = p; scene6(t); c.restore(); }

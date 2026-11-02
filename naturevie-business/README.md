@@ -9,3 +9,8 @@ Vidéo pour la page Naturetvie Business (Nature & Vie, Abidjan) : modèle parten
 - `assets/` : logo officiel (tel quel, sur plaque #F7F7F7) et photo du SG9 Plus Advance (recadrage des marges vides uniquement).
 - `python3 build.py` → `dist/test.html` ; rendu image par image via Playwright puis ffmpeg (voir historique de la session).
 - Aucun mot « WhatsApp » dans la vidéo : seulement le numéro. Aucun nom de marque MLM.
+
+## Voix off (Isac, ElevenLabs) — version finale 46,6 s
+La piste fournie (37,25 s, un seul fichier) est découpée en 6 paragraphes, chacun posé intact sur sa scène
+(décalages fichier→vidéo : P1 +0,30 s · P2 +1,20 s · P3 +1,57 s · P4 +2,53 s · P5 +5,44 s · P6 +6,57 s).
+Les scènes sont recalées sur la voix réelle (CFG dans `src/scenes.js`) ; la musique (`audio/make_music.py`) baisse de 9 dB sous la voix et remonte à la fin.

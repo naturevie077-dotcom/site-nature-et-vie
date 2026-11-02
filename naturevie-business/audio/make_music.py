@@ -4,7 +4,8 @@ Rythmée, confiante, business : tension (0-5 s) → groove (5 s+) → montée (3
 import numpy as np, sys
 from scipy import signal
 from scipy.io import wavfile
-SR = 48000; DUR = 52.0; N = int(SR * DUR); BPM = 108; BEAT = 60 / BPM; BAR = BEAT * 4
+T_DROP, T_FULL, T_B0, T_PT, T_FIN = 4.9, 18.8, 33.2, 35.6, 43.9   # temps de la vidéo (voir CFG de scenes.js)
+SR = 48000; DUR = 46.6; N = int(SR * DUR); BPM = 108; BEAT = 60 / BPM; BAR = BEAT * 4
 rng = np.random.default_rng(21); L = np.zeros(N); R = np.zeros(N)
 midi = lambda m: 440.0 * 2 ** ((m - 69) / 12)
 def put(sig, t0, pan=0.0, g=1.0):
@@ -41,13 +42,13 @@ def noise_riser(t0, dur, g=1.0, f0=300, f1=9000):
 CH = {'C': ([48, 55, 60, 64, 67], 36), 'G': ([43, 50, 59, 62, 67], 43), 'Am': ([45, 52, 57, 60, 64], 45), 'F': ([41, 48, 57, 60, 65], 41)}
 prog = ['C', 'G', 'Am', 'F']
 def section(t):  # 0 tension, 1 groove, 2 plein, 3 montée
-    return 0 if t < 5.0 else 3 if 38.0 <= t < 41.7 else 1 if t < 22.0 else 2
+    return 0 if t < T_DROP else 3 if T_B0 <= t < T_PT else 1 if t < T_FULL else 2
 # --- tension 0-5 s : bourdon grave + pouls qui accélère + montée de bruit
-put(tone(55, 5.2, ((1, 1.0), (2, 0.25)), 0.5, 0.0), 0, 0, 0.5); put(tone(82.4, 5.2, ((1, 1.0),), 0.8, 0.0), 0, 0, 0.3)
+put(tone(55, T_DROP + 0.3, ((1, 1.0), (2, 0.25)), 0.5, 0.0), 0, 0, 0.5); put(tone(82.4, T_DROP + 0.3, ((1, 1.0),), 0.8, 0.0), 0, 0, 0.3)
 tb = 0.0; step = 0.62
-while tb < 4.9:
-    kick(tb, 0.55 + 0.3 * tb / 5); tb += step; step = max(0.2, step * 0.93)
-noise_riser(0.2, 4.8, 0.7)
+while tb < T_DROP:
+    kick(tb, 0.55 + 0.3 * tb / T_DROP); tb += step; step = max(0.2, step * 0.93)
+noise_riser(0.2, T_DROP - 0.3, 0.7)
 # --- groove
 nb = int(DUR / BEAT) + 1
 for b in range(nb):
@@ -55,34 +56,34 @@ for b in range(nb):
     if t0 >= DUR: break
     sec = section(t0)
     bar = int(t0 // BAR); ch = prog[bar % 4]; notes, root = CH[ch]
-    if t0 >= 41.7 and t0 < 41.7 + BEAT * 0.5: continue
-    if sec in (1, 2, 3) or t0 >= 41.7:
+    if t0 >= T_PT and t0 < T_PT + BEAT * 0.5: continue
+    if sec in (1, 2, 3) or t0 >= T_PT:
         kick(t0, 0.9)
         hat(t0 + BEAT / 2, 0.9); hat(t0, 0.5)
         if b % 4 == 3: hat(t0 + BEAT / 2, 0.8, True)
-        if (sec == 2 or t0 >= 41.7) and b % 2 == 1: clap(t0)
+        if (sec == 2 or t0 >= T_PT) and b % 2 == 1: clap(t0)
         # basse : fondamentale + syncope
         bass(midi(root), t0, BEAT * 0.9, 1.0); 
         if b % 4 == 2: bass(midi(root + 12), t0 + BEAT * 0.5, BEAT * 0.4, 0.7)
-    if b % 4 == 0 and (sec in (1, 2) or t0 >= 41.7) and t0 >= 5.0:
+    if b % 4 == 0 and (sec in (1, 2) or t0 >= T_PT) and t0 >= T_DROP:
         pad([midi(m) for m in notes[1:]], t0, BAR, 0.8 if sec == 1 else 1.0)
     # arpèges : lumineux dans les parties pleines
-    if t0 >= 5.0 and (sec in (1, 2, 3) or t0 >= 41.7):
+    if t0 >= T_DROP and (sec in (1, 2, 3) or t0 >= T_PT):
         ar = notes[1:] + [notes[1] + 12]
         for k in range(2):
             m = ar[(b * 2 + k) % len(ar)] + 12; pluck(m, t0 + k * BEAT / 2, 0.6 if sec == 1 else 0.9, [-0.4, 0.4][k], 7.0)
-    if sec == 2 or t0 >= 41.7:
+    if sec == 2 or t0 >= T_PT:
         if b % 4 in (1, 3): stab([n + 12 for n in notes[1:4]], t0 + BEAT * 0.5, 1.0)
 # --- scène 5 : montée vers « Point. » (38 → 41,7 s) puis impact
-noise_riser(38.0, 3.7, 1.0, 200, 11000)
+noise_riser(T_B0, T_PT - T_B0, 1.0, 200, 11000)
 for k in range(24):  # roulement de caisse claire accéléré
-    tt = 38.5 + 3.1 * (1 - (1 - k / 24) ** 1.6); n = int(0.06 * SR); x = rng.standard_normal(n); x = signal.sosfilt(signal.butter(2, 1800 / (SR / 2), 'high', output='sos'), x) * np.exp(-np.arange(n) / SR * 50); put(x, tt, 0, 0.12 + 0.2 * k / 24)
-kick(41.7, 1.2); put(tone(48, 1.2, ((1, 1.0),), 0.002, 3.0), 41.7, 0, 0.9)
+    tt = T_B0 + 0.5 + (T_PT - T_B0 - 0.6) * (1 - (1 - k / 24) ** 1.6); n = int(0.06 * SR); x = rng.standard_normal(n); x = signal.sosfilt(signal.butter(2, 1800 / (SR / 2), 'high', output='sos'), x) * np.exp(-np.arange(n) / SR * 50); put(x, tt, 0, 0.12 + 0.2 * k / 24)
+kick(T_PT, 1.2); put(tone(48, 1.2, ((1, 1.0),), 0.002, 3.0), T_PT, 0, 0.9)
 def bell(t0, f, g):
     n = int(3.0 * SR); t = np.arange(n) / SR; y = sum(a * np.sin(2 * np.pi * midi(f) * r * t) * np.exp(-t / d) for r, a, d in [(1, 1, 1.2), (2.76, .35, .7), (5.4, .12, .35)]); put(y, t0, 0.1, g)
-bell(41.7, 84, 0.2); bell(48.7, 88, 0.16); bell(6.15, 91, 0.14)
+bell(T_PT, 84, 0.2); bell(T_FIN + 0.1, 88, 0.16); bell(5.6, 91, 0.14)
 # final : accord tenu qui se résout
-pad([midi(m) for m in [48, 55, 60, 64, 67, 72]], 49.6, 2.4, 1.2, 0.3, 0.9); kick(49.6, 1.0); clap(49.6)
+pad([midi(m) for m in [48, 55, 60, 64, 67, 72]], T_FIN + 0.2, DUR - T_FIN - 0.5, 1.2, 0.3, 0.9); kick(T_FIN + 0.2, 1.0); clap(T_FIN + 0.2)
 # --- réverbération
 t = np.arange(int(1.6 * SR)) / SR; ir = rng.standard_normal(len(t)) * np.exp(-t * 2.8); ir = signal.sosfilt(signal.butter(2, 5000 / (SR / 2), 'low', output='sos'), ir); ir /= np.abs(ir).sum() * 0.14
 wl = signal.fftconvolve(L, ir)[:N]; wr = signal.fftconvolve(R, ir[::-1])[:N]
